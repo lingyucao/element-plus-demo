@@ -1,0 +1,83 @@
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+
+		<script src="https://unpkg.com/vue@3.3.1/dist/vue.global.js" rel="external nofollow"></script>
+		<link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" rel="external nofollow" target="_blank">
+		<!-- 没泄漏版本 -->
+		<!-- 	<script src="https://unpkg.com/vue@3.3.1/dist/vue.global.js" rel="external nofollow"></script> -->
+
+
+
+
+		<!-- plus 1.1.0泄漏极少 -->
+
+		<!-- 		<script src="https://unpkg.com/element-plus@1.1.0-beta.24/dist/index.full.js" rel="external nofollow"></script>
+	
+		 -->
+		<!-- plus 2.3.4有泄漏 -->
+		<script src="https://unpkg.com/element-plus@2.3.4/dist/index.full.js" rel="external nofollow"></script>
+
+
+		<title>vue3组件 内存泄漏问题</title>
+	</head>
+	<body>
+		<div id="app">
+
+		
+
+			 <button @click='add'>加载数据</button>
+				<button @click='del'>销毁</button>
+
+				<!-- 内存泄漏组件el-select -->
+				<el-select v-if='select' v-model="value" placeholder="请选择">
+					<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+					</el-option>
+				</el-select>
+
+		</div>
+
+	</body>
+
+	<script>
+		const App = {
+			data() {
+				return {
+					select: false,
+					value: '',
+					options: []
+				};
+			},
+			methods: {
+
+				del() {
+					this.$nextTick(() => {
+						this.select = false
+						this.options = null
+					})
+
+				},
+				add() {
+					this.select = true
+					//组件中每一个引用数据不会被释放，
+					this.options = new Array(2000).fill(null).map((item, index) => {
+						return {
+							value: '选项' + index,
+							label: '黄金糕' + index
+						}
+					})
+
+				}
+			},
+
+		}
+		const app = Vue.createApp(App);
+		app.use(ElementPlus);
+
+
+
+
+		app.mount("#app");
+	</script>
+</html>
